@@ -1,0 +1,27 @@
+{
+  "gamePage":{
+    "bgImage":"static/imgs/bg.jpg",
+    "figurePosition":[
+      {
+        "position":[
+          {
+            "x": 560,
+            "y": 310
+          },
+          {
+            "x": 1360,
+            "y": 310
+          },
+          {
+            "x": 1360,
+            "y": 690
+          },
+          {
+            "x": 560,
+            "y": 690
+          }
+        ]
+      }
+    ]
+  }
+}
