@@ -124,7 +124,7 @@
                     return item;
                 });
                 let num = 0;
-                console.log(newArr);
+
                 newArr.map((item, index) => {
                     if (typeof(item) === 'object') {
                         ++num;
@@ -260,6 +260,8 @@
             }
 
             function drawLineUp(e) {
+                stage1.removeAllEventListeners('stagemousemove');
+                stage1.removeAllEventListeners('stagemouseup');
                 toX = e.target.mouseX;
                 toY = e.target.mouseY;
                 obj = {
@@ -280,6 +282,7 @@
                     if (status) {
                         // ++cutNumber;
                         canvas1.style.display = 'none';
+                        stage1.clear();
                         stage.removeChild(shape1);
                         stage.children.map((item, index) => {
                             if (item.selected) {
@@ -298,8 +301,7 @@
                         });
                     } else {
                         stage1.clear();
-                        stage1.removeAllEventListeners('stagemousemove');
-                        stage1.removeAllEventListeners('stagemouseup');
+
                         // stage1.removeAllEventListeners('stagemousedown');
                     }
                 }
