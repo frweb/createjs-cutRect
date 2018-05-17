@@ -1,6 +1,7 @@
 <template>
     <div>
-        <canvas id="canvas" width="1920" height="1080" style="position: absolute; display: block; background-color:rgba(255, 255, 255, 1.00);width:19.2rem;height:10.8rem"></canvas>
+        <canvas id="canvas" width="1920" height="1080"
+                style="position: absolute; display: block; background-color:rgba(255, 255, 255, 1.00);width:19.2rem;height:10.8rem"></canvas>
     </div>
 </template>
 <script>
@@ -174,7 +175,7 @@
                     oldX = e.stageX;
                     oldY = e.stageY;
                 });
-                shape.addEventListener("dblclick",function(e){
+                shape.addEventListener("dblclick", function (e) {
                     // let x = e.target.x;
                     // let y = e.target.y;
                     // let arr1 = copyArray(e.target.arr);
@@ -200,21 +201,56 @@
                     // canvas1.style.display = 'block';
                 });
                 shape.addEventListener("pressmove", function (e) {
-                    e.target.status = 1;
+                    e.target.status = 10;
                     e.target.x += e.stageX - oldX;
                     e.target.y += e.stageY - oldY;
                     oldX = e.stageX;
                     oldY = e.stageY;
                     stage.removeAllEventListeners('stagemousemove');
                     stage.removeAllEventListeners('stagemouseup');
-                    stage.children.map((item,index)=>{
-                        if(item.status === 2)
-                        {
+                    stage.children.map((item, index) => {
+                        if (item.status === 2) {
                             stage.removeChild(stage.children[index])
                         }
                     });
+//                    let x = e.target.x;
+//                    let y = e.target.y;
+//                    e.target.arr.map((item) => {
+//                        item.x += (x);
+//                        item.y += (y);
+//                        return item;
+//                    });
+//                    e.target.position.map((item) => {
+//                        item.start.x += (x);
+//                        item.start.y += (y);
+//                        item.end.x += (x);
+//                        item.end.y += (y);
+//                    });
                 });
                 shape.addEventListener("pressup", function (e) {
+                    let x = e.target.x;
+                    let y = e.target.y;
+                    let arr1 = copyArray(e.target.arr);
+                    let position1 = copyArray(e.target.position);
+                    console.log(e.target.arr,'arr');
+                    console.log(e.target.position,'po');
+                    console.log(arr1,'setarr');
+                    console.log(position1,'setpo');
+                    arr1.map((item) => {
+                        item.x += (x);
+                        item.y += (y);
+                        return item;
+                    });
+                    position1.map((item) => {
+                        item.start.x += (x);
+                        item.start.y += (y);
+                        item.end.x += (x);
+                        item.end.y += (y);
+                    });
+//                    let shape =  drawLineFigure(arr1).shape;
+//                    stage.addChild(shape);
+                    e.target.arr1 = arr1;
+                    e.target.position1 = position1;
                 });
             }
 
@@ -239,9 +275,8 @@
                 toY = e.target.mouseY;
                 line.graphics.setStrokeStyle(6).beginStroke("red").moveTo(moveX, moveY).lineTo(toX, toY).closePath();
                 line.status = 2;
-                stage.children.map((item,index)=>{
-                    if(item.status === 2)
-                    {
+                stage.children.map((item, index) => {
+                    if (item.status === 2) {
                         stage.removeChild(stage.children[index])
                     }
                 });
@@ -253,9 +288,8 @@
             function drawLineUp(e) {
                 stage.removeAllEventListeners('stagemousemove');
                 stage.removeAllEventListeners('stagemouseup');
-                stage.children.map((item,index)=>{
-                    if(item.status === 2)
-                    {
+                stage.children.map((item, index) => {
+                    if (item.status === 2) {
                         stage.removeChild(stage.children[index])
                     }
                 });
@@ -272,20 +306,28 @@
                     }
                 };
                 let shapeChildren = stage.children;
-                if(shapeChildren.length>2)
-                {
+                if (shapeChildren.length > 2) {
 
-                    shapeChildren.map((item,index)=>{
-                        if(item.type === 'shape' && item.type){
+                    shapeChildren.map((item, index) => {
+                        if (item.type === 'shape' && item.type) {
                             figurePosition = [];
                             position = [];
-                            figurePosition = item.arr;
-                            position = item.position;
-                            let {status, shapeList} = drawNewFigure(item.position, obj);
+                            let position1 =[];
+                            if(item.status === 10)
+                            {
+                                figurePosition = item.arr1;
+                                position1 = item.position1;
+                                position = item.position1;
+
+                            }else{
+                                figurePosition = item.arr;
+                                position1 = item.position;
+                                position = item.position;
+                            }
+                            let {status, shapeList} = drawNewFigure(position1, obj);
 
                             item.selected = status;
-                            if(status)
-                            {
+                            if (status) {
                                 shapeList.map((item1) => {
                                     let shape = drawLineFigure(item1).shape;
                                     let position1 = drawLineFigure(item1).arr;
@@ -303,7 +345,8 @@
                         }
                         return item;
                     });
-                    function removeChildren(){
+
+                    function removeChildren() {
                         stage.children.map((item, index) => {
                             if (item.selected) {
                                 stage.removeChild(stage.children[index])
@@ -311,9 +354,10 @@
                             }
                         });
                     }
+
                     removeChildren();
                 }
-                else{
+                else {
                     let {status, shapeList} = drawNewFigure(position, obj);
                     if (status) {
                         stage.children.map((item, index) => {
