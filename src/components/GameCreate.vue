@@ -288,8 +288,8 @@
                             {
                                 shapeList.map((item1) => {
                                     let shape = drawLineFigure(item1).shape;
-                                    let position1 = copyArray(drawLineFigure(item1).arr);
-                                    figurePosition = copyArray(item1);
+                                    let position1 = drawLineFigure(item1).arr;
+                                    figurePosition = item1;
                                     position = position1;
                                     shape.arr = item1;
                                     shape.type = 'shape';
