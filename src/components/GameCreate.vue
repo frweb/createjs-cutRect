@@ -176,29 +176,6 @@
                     oldY = e.stageY;
                 });
                 shape.addEventListener("dblclick", function (e) {
-                    // let x = e.target.x;
-                    // let y = e.target.y;
-                    // let arr1 = copyArray(e.target.arr);
-                    // let position1 = copyArray(e.target.position);
-                    // arr1.map((item) => {
-                    //     item.x += (x);
-                    //     item.y += (y);
-                    //     return item;
-                    // });
-                    // position1.map((item) => {
-                    //     item.start.x += (x);
-                    //     item.start.y += (y);
-                    //     item.end.x += (x);
-                    //     item.end.y += (y);
-                    // });
-                    // stage.children.map((item) => {
-                    //     item.selected = false;
-                    // });
-                    // e.target.selected = true;
-                    // console.log(stage);
-                    // figurePosition = arr1;
-                    // position = position1;
-                    // canvas1.style.display = 'block';
                 });
                 shape.addEventListener("pressmove", function (e) {
                     e.target.status = 10;
