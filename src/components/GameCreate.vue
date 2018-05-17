@@ -279,8 +279,8 @@
                         if(item.type === 'shape' && item.type){
                             figurePosition = [];
                             position = [];
-                            figurePosition = copyArray(item.arr);
-                            position = copyArray(item.position);
+                            figurePosition = item.arr;
+                            position = item.position;
                             let {status, shapeList} = drawNewFigure(item.position, obj);
 
                             item.selected = status;
@@ -303,17 +303,15 @@
                         }
                         return item;
                     });
-                    stage.children.map((item, index) => {
-                        if (item.selected) {
-                            stage.removeChild(stage.children[index]);
-                            stage.children.map((item, index) => {
-                                if (item.selected) {
-
-                                    stage.removeChild(stage.children[index])
-                                }
-                            });
-                        }
-                    });
+                    function removeChildren(){
+                        stage.children.map((item, index) => {
+                            if (item.selected) {
+                                stage.removeChild(stage.children[index])
+                                removeChildren();
+                            }
+                        });
+                    }
+                    removeChildren();
                 }
                 else{
                     let {status, shapeList} = drawNewFigure(position, obj);
