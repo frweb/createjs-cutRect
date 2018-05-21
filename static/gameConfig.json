@@ -1,10 +1,10 @@
 {
   "gamePage": {
     "bgImage": "static/imgs/bg.jpg",
-    "figurePosition": [
+    "figurePositionList": [
       {
         "cutNumber": 10,
-        "position": [
+        "positionList": [
           {
             "x": 560,
             "y": 310

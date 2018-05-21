@@ -15,22 +15,23 @@
             let shape1;
             let position, figurePosition;
             let cutNumber;
+            let gameInfo = {};
+            let moveX,
+                moveY,
+                toX,
+                toY;
+            let obj = {};
+            let _this = this;
+
             canvas = document.getElementById("canvas");
             stage = new createjs.Stage(canvas);
             createjs.Touch.enable(stage);
             createjs.Ticker.setFPS(10);
             createjs.Ticker.addEventListener("tick", handleTicker);
-
             function handleTicker() {
                 stage.update();
             }
 
-            canvas.addEventListener('mousewheel', function (e) {
-                moveX = e.offsetX;
-                moveY = e.offsetY;
-                document.title = 'x:' + moveX + ',' + 'y:' + moveY;
-            });
-            let _this = this;
             let loader = new createjs.LoadQueue(false);
 
             loader.addEventListener("fileload", handleFileLoad);
@@ -39,10 +40,9 @@
 
             function handleFileLoad(e) {
                 gameInfo = e.result.gamePage;
-                figurePosition = gameInfo.figurePosition[0].position;
-                cutNumber = gameInfo.figurePosition[0].cutNumber;
+                figurePosition = gameInfo.figurePositionList[0].positionList;
+                cutNumber = gameInfo.figurePositionList[0].cutNumber;
             }
-
             function completeHandler(e) {
                 let bitmap = new createjs.Bitmap(gameInfo.bgImage);
                 position = drawLineFigure(figurePosition).arr;
@@ -53,7 +53,14 @@
                 stage.update();
             }
 
-            let gameInfo = {};
+
+            canvas.addEventListener('mousewheel', function (e) {
+                moveX = e.offsetX;
+                moveY = e.offsetY;
+                document.title = 'x:' + moveX + ',' + 'y:' + moveY;
+            });
+
+
 
             function drawLineFigure(arr) {
                 let shape = new createjs.Shape();
@@ -176,6 +183,7 @@
                     }
                 })
             }
+
             function addSharpEvent(shape) {
                 let oldX;
                 let oldY;
@@ -221,12 +229,7 @@
                 });
             }
 
-            let moveX,
-                moveY,
-                toX,
-                toY;
-            let obj = {};
-            let line;
+
             stage.addEventListener('stagemousedown', drawLineDown);
 
             function drawLineDown(e) {
@@ -240,6 +243,7 @@
             }
 
             function drawLineMove(e) {
+                let line;
                 line = new createjs.Shape();
                 toX = e.target.mouseX;
                 toY = e.target.mouseY;
@@ -253,6 +257,7 @@
                 stage.addChild(line);
                 stage.update();
             }
+
             function drawLineUp(e) {
                 stage.removeAllEventListeners('stagemousemove');
                 stage.removeAllEventListeners('stagemouseup');
@@ -278,7 +283,6 @@
                 };
                 let shapeChildren = stage.children;
                 if (shapeChildren.length > 2) {
-
                     let statusArr = [];
                     shapeChildren.map((item, index) => {
                         if (item.type === 'shape' && item.type) {
@@ -296,10 +300,8 @@
                                 position = item.position;
                             }
                             let {status, shapeList} = drawNewFigure(position1, obj);
-
                             item.selected = status;
                             statusArr.push(status);
-                            console.log(statusArr);
                             if (status) {
                                 shapeList.map((item1) => {
                                     let shape = drawLineFigure(item1).shape;
