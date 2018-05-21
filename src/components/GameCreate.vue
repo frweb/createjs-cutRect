@@ -24,6 +24,7 @@
             function handleTicker() {
                 stage.update();
             }
+
             canvas.addEventListener('mousewheel', function (e) {
                 moveX = e.offsetX;
                 moveY = e.offsetY;
@@ -35,6 +36,7 @@
             loader.addEventListener("fileload", handleFileLoad);
             loader.addEventListener("complete", completeHandler);
             loader.loadFile("static/gameConfig.json");
+
             function handleFileLoad(e) {
                 gameInfo = e.result.gamePage;
                 figurePosition = gameInfo.figurePosition[0].position;
@@ -50,6 +52,7 @@
                 stage.addChild(shape1);
                 stage.update();
             }
+
             let gameInfo = {};
 
             function drawLineFigure(arr) {
@@ -173,7 +176,6 @@
                     }
                 })
             }
-
             function addSharpEvent(shape) {
                 let oldX;
                 let oldY;
@@ -193,7 +195,7 @@
                     stage.removeAllEventListeners('stagemousemove');
                     stage.removeAllEventListeners('stagemouseup');
                     stage.children.map((item, index) => {
-                        if (item.status === 2) {
+                        if (item.type === 'lines') {
                             stage.removeChild(stage.children[index])
                         }
                     });
@@ -232,7 +234,7 @@
                 moveY = e.target.mouseY;
                 stage.addEventListener('stagemousemove', drawLineMove);
                 stage.addEventListener('stagemouseup', drawLineUp);
-                if(cutNumber <= 0){
+                if (cutNumber <= 0) {
                     stage.removeAllEventListeners()
                 }
             }
@@ -242,25 +244,23 @@
                 toX = e.target.mouseX;
                 toY = e.target.mouseY;
                 line.graphics.setStrokeStyle(6).beginStroke("red").moveTo(moveX, moveY).lineTo(toX, toY).closePath();
-                line.status = 2;
+                line.type = 'lines';
                 stage.children.map((item, index) => {
-                    if (item.status === 2) {
+                    if (item.type === 'lines') {
                         stage.removeChild(stage.children[index])
                     }
                 });
                 stage.addChild(line);
                 stage.update();
             }
-
             function drawLineUp(e) {
                 stage.removeAllEventListeners('stagemousemove');
                 stage.removeAllEventListeners('stagemouseup');
-                if(cutNumber <= 0)
-                {
+                if (cutNumber <= 0) {
                     return false;
                 }
                 stage.children.map((item, index) => {
-                    if (item.status === 2) {
+                    if (item.type === 'lines') {
                         stage.removeChild(stage.children[index])
                     }
                 });
@@ -284,14 +284,13 @@
                         if (item.type === 'shape' && item.type) {
                             figurePosition = [];
                             position = [];
-                            let position1 =[];
-                            if(item.status === 10)
-                            {
+                            let position1 = [];
+                            if (item.status === 10) {
                                 figurePosition = item.arr1;
                                 position1 = item.position1;
                                 position = item.position1;
 
-                            }else{
+                            } else {
                                 figurePosition = item.arr;
                                 position1 = item.position;
                                 position = item.position;
@@ -300,7 +299,7 @@
 
                             item.selected = status;
                             statusArr.push(status);
-
+                            console.log(statusArr);
                             if (status) {
                                 shapeList.map((item1) => {
                                     let shape = drawLineFigure(item1).shape;
@@ -319,6 +318,7 @@
                         }
                         return item;
                     });
+
                     function removeChildren() {
                         stage.children.map((item, index) => {
                             if (item.selected) {
@@ -327,11 +327,10 @@
                             }
                         });
                     }
-                    removeChildren();
-                    if(statusArr.indexOf(true)!==-1)
-                    {
-                        --cutNumber;
 
+                    removeChildren();
+                    if (statusArr.indexOf(true) !== -1) {
+                        --cutNumber;
                     }
                 }
                 else {
