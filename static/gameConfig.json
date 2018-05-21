@@ -1,9 +1,10 @@
 {
-  "gamePage":{
-    "bgImage":"static/imgs/bg.jpg",
-    "figurePosition":[
+  "gamePage": {
+    "bgImage": "static/imgs/bg.jpg",
+    "figurePosition": [
       {
-        "position":[
+        "cutNumber": 3,
+        "position": [
           {
             "x": 560,
             "y": 310

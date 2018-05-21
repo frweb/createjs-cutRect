@@ -11,14 +11,12 @@
         },
         methods: {},
         mounted() {
-            let canvas, stage, canvas1, stage1;
+            let canvas, stage;
             let shape1;
             let position, figurePosition;
-            let cutNumber = 0;
+            let cutNumber;
             canvas = document.getElementById("canvas");
             stage = new createjs.Stage(canvas);
-            canvas1 = document.getElementById("canvas1");
-            stage1 = new createjs.Stage(canvas1);
             createjs.Touch.enable(stage);
             createjs.Ticker.setFPS(10);
             createjs.Ticker.addEventListener("tick", handleTicker);
@@ -26,10 +24,9 @@
             function handleTicker() {
                 stage.update();
             }
-
             canvas.addEventListener('mousewheel', function (e) {
-                moveX = e.clientX;
-                moveY = e.clientY;
+                moveX = e.offsetX;
+                moveY = e.offsetY;
                 document.title = 'x:' + moveX + ',' + 'y:' + moveY;
             });
             let _this = this;
@@ -38,7 +35,21 @@
             loader.addEventListener("fileload", handleFileLoad);
             loader.addEventListener("complete", completeHandler);
             loader.loadFile("static/gameConfig.json");
+            function handleFileLoad(e) {
+                gameInfo = e.result.gamePage;
+                figurePosition = gameInfo.figurePosition[0].position;
+                cutNumber = gameInfo.figurePosition[0].cutNumber;
+            }
 
+            function completeHandler(e) {
+                let bitmap = new createjs.Bitmap(gameInfo.bgImage);
+                position = drawLineFigure(figurePosition).arr;
+                shape1 = drawLineFigure(figurePosition).shape;
+                shape1.selected = true;
+                stage.addChild(bitmap);
+                stage.addChild(shape1);
+                stage.update();
+            }
             let gameInfo = {};
 
             function drawLineFigure(arr) {
@@ -78,7 +89,6 @@
                             }
                         })
                     }
-
                 }
                 return {arr: newArr, shape: shape};
             }
@@ -106,13 +116,11 @@
                 return false
             }
 
-            function drawNewFigure(elementPosition, dynamicLine, number = 1) {
+            function drawNewFigure(elementPosition, dynamicLine) {
                 let newArr = [];
                 let indexArr = [];
                 let newFigurePosition1 = [];
                 let newFigurePosition2 = [];
-                let newFigurePosition3 = [];
-                let newFigurePosition4 = [];
                 let newPosition = [];
                 newPosition = figurePosition.map((item) => {
                     return item
@@ -141,7 +149,6 @@
                 if (indexArr.length < 2) {
                     return false;
                 } else {
-                    let slope = intersection(dynamicLine);
                     newFigurePosition1 = newFigurePosition1.concat(newPosition.slice(0, indexArr[0] + 1), newPosition.slice(indexArr[1], newPosition.length));
                     newFigurePosition2 = newFigurePosition2.concat(newPosition.slice(indexArr[0], indexArr[1] + 1));
                     return {
@@ -190,29 +197,12 @@
                             stage.removeChild(stage.children[index])
                         }
                     });
-//                    let x = e.target.x;
-//                    let y = e.target.y;
-//                    e.target.arr.map((item) => {
-//                        item.x += (x);
-//                        item.y += (y);
-//                        return item;
-//                    });
-//                    e.target.position.map((item) => {
-//                        item.start.x += (x);
-//                        item.start.y += (y);
-//                        item.end.x += (x);
-//                        item.end.y += (y);
-//                    });
                 });
                 shape.addEventListener("pressup", function (e) {
                     let x = e.target.x;
                     let y = e.target.y;
                     let arr1 = copyArray(e.target.arr);
                     let position1 = copyArray(e.target.position);
-                    console.log(e.target.arr,'arr');
-                    console.log(e.target.position,'po');
-                    console.log(arr1,'setarr');
-                    console.log(position1,'setpo');
                     arr1.map((item) => {
                         item.x += (x);
                         item.y += (y);
@@ -224,8 +214,6 @@
                         item.end.x += (x);
                         item.end.y += (y);
                     });
-//                    let shape =  drawLineFigure(arr1).shape;
-//                    stage.addChild(shape);
                     e.target.arr1 = arr1;
                     e.target.position1 = position1;
                 });
@@ -244,6 +232,9 @@
                 moveY = e.target.mouseY;
                 stage.addEventListener('stagemousemove', drawLineMove);
                 stage.addEventListener('stagemouseup', drawLineUp);
+                if(cutNumber <= 0){
+                    stage.removeAllEventListeners()
+                }
             }
 
             function drawLineMove(e) {
@@ -257,7 +248,6 @@
                         stage.removeChild(stage.children[index])
                     }
                 });
-                // stage.removeAllChildren();
                 stage.addChild(line);
                 stage.update();
             }
@@ -265,6 +255,10 @@
             function drawLineUp(e) {
                 stage.removeAllEventListeners('stagemousemove');
                 stage.removeAllEventListeners('stagemouseup');
+                if(cutNumber <= 0)
+                {
+                    return false;
+                }
                 stage.children.map((item, index) => {
                     if (item.status === 2) {
                         stage.removeChild(stage.children[index])
@@ -285,6 +279,7 @@
                 let shapeChildren = stage.children;
                 if (shapeChildren.length > 2) {
 
+                    let statusArr = [];
                     shapeChildren.map((item, index) => {
                         if (item.type === 'shape' && item.type) {
                             figurePosition = [];
@@ -304,6 +299,8 @@
                             let {status, shapeList} = drawNewFigure(position1, obj);
 
                             item.selected = status;
+                            statusArr.push(status);
+
                             if (status) {
                                 shapeList.map((item1) => {
                                     let shape = drawLineFigure(item1).shape;
@@ -322,27 +319,30 @@
                         }
                         return item;
                     });
-
                     function removeChildren() {
                         stage.children.map((item, index) => {
                             if (item.selected) {
-                                stage.removeChild(stage.children[index])
+                                stage.removeChild(stage.children[index]);
                                 removeChildren();
                             }
                         });
                     }
-
                     removeChildren();
+                    if(statusArr.indexOf(true)!==-1)
+                    {
+                        --cutNumber;
+
+                    }
                 }
                 else {
                     let {status, shapeList} = drawNewFigure(position, obj);
                     if (status) {
+                        --cutNumber;
                         stage.children.map((item, index) => {
                             if (item.selected) {
                                 stage.removeChild(stage.children[index])
                             }
                         });
-                        // stage.removeChild(shape1);
                         position = [];
                         figurePosition = [];
                         shapeList.map((item) => {
@@ -351,7 +351,6 @@
                             shape.arr = item;
                             shape.position = position;
                             shape.type = 'shape';
-                            // shape.status = true;
                             addSharpEvent(shape);
                             stage.addChild(shape);
                             stage.update();
@@ -361,21 +360,6 @@
 
                     }
                 }
-            }
-
-            function handleFileLoad(e) {
-                gameInfo = e.result.gamePage;
-                figurePosition = gameInfo.figurePosition[0].position;
-            }
-
-            function completeHandler(e) {
-                let bitmap = new createjs.Bitmap(gameInfo.bgImage);
-                position = drawLineFigure(figurePosition).arr;
-                shape1 = drawLineFigure(figurePosition).shape;
-                shape1.selected = true;
-                stage.addChild(bitmap);
-                stage.addChild(shape1);
-                stage.update();
             }
         }
     }
