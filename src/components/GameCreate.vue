@@ -151,10 +151,7 @@
                     }
                     return item
                 });
-                console.log(indexArr.length);
-                if (indexArr.length < 2 || indexArr.length > 2) {
-                    return false;
-                } else {
+                if (indexArr.length === 2) {
                     newFigurePosition1 = newFigurePosition1.concat(newPosition.slice(0, indexArr[0] + 1), newPosition.slice(indexArr[1], newPosition.length));
                     newFigurePosition2 = newFigurePosition2.concat(newPosition.slice(indexArr[0], indexArr[1] + 1));
                     return {
@@ -163,6 +160,8 @@
                         shapePositionList: [],
                         number: 1
                     };
+                } else {
+                    return false;
                 }
             }
 
