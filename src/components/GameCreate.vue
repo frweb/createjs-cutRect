@@ -28,12 +28,12 @@
             createjs.Touch.enable(stage);
             createjs.Ticker.setFPS(10);
             createjs.Ticker.addEventListener("tick", handleTicker);
+
             function handleTicker() {
                 stage.update();
             }
 
             let loader = new createjs.LoadQueue(false);
-
             loader.addEventListener("fileload", handleFileLoad);
             loader.addEventListener("complete", completeHandler);
             loader.loadFile("static/gameConfig.json");
@@ -43,24 +43,19 @@
                 figurePosition = gameInfo.figurePositionList[0].positionList;
                 cutNumber = gameInfo.figurePositionList[0].cutNumber;
             }
+
             function completeHandler(e) {
                 let bitmap = new createjs.Bitmap(gameInfo.bgImage);
                 position = drawLineFigure(figurePosition).arr;
                 shape1 = drawLineFigure(figurePosition).shape;
                 shape1.selected = true;
+                shape1.type = 'shape';
+                shape1.position = position;
+                shape1.arr = figurePosition;
                 stage.addChild(bitmap);
                 stage.addChild(shape1);
                 stage.update();
             }
-
-
-            canvas.addEventListener('mousewheel', function (e) {
-                moveX = e.offsetX;
-                moveY = e.offsetY;
-                document.title = 'x:' + moveX + ',' + 'y:' + moveY;
-            });
-
-
 
             function drawLineFigure(arr) {
                 let shape = new createjs.Shape();
@@ -156,7 +151,8 @@
                     }
                     return item
                 });
-                if (indexArr.length < 2) {
+                console.log(indexArr.length);
+                if (indexArr.length < 2 || indexArr.length > 2) {
                     return false;
                 } else {
                     newFigurePosition1 = newFigurePosition1.concat(newPosition.slice(0, indexArr[0] + 1), newPosition.slice(indexArr[1], newPosition.length));
@@ -192,10 +188,8 @@
                     oldX = e.stageX;
                     oldY = e.stageY;
                 });
-                shape.addEventListener("dblclick", function (e) {
-                });
                 shape.addEventListener("pressmove", function (e) {
-                    e.target.status = 10;
+                    e.target.status = 2;
                     e.target.x += e.stageX - oldX;
                     e.target.y += e.stageY - oldY;
                     oldX = e.stageX;
@@ -228,7 +222,6 @@
                     e.target.position1 = position1;
                 });
             }
-
 
             stage.addEventListener('stagemousedown', drawLineDown);
 
@@ -282,84 +275,57 @@
                     }
                 };
                 let shapeChildren = stage.children;
-                if (shapeChildren.length > 2) {
-                    let statusArr = [];
-                    shapeChildren.map((item, index) => {
-                        if (item.type === 'shape' && item.type) {
-                            figurePosition = [];
-                            position = [];
-                            let position1 = [];
-                            if (item.status === 10) {
-                                figurePosition = item.arr1;
-                                position1 = item.position1;
-                                position = item.position1;
+                let statusArr = [];
+                shapeChildren.map((item, index) => {
+                    if (item.type === 'shape' && item.type) {
+                        figurePosition = [];
+                        position = [];
+                        let position1 = [];
+                        if (item.status === 2) {
+                            figurePosition = item.arr1;
+                            position1 = item.position1;
+                            position = item.position1;
 
-                            } else {
-                                figurePosition = item.arr;
-                                position1 = item.position;
-                                position = item.position;
-                            }
-                            let {status, shapeList} = drawNewFigure(position1, obj);
-                            item.selected = status;
-                            statusArr.push(status);
-                            if (status) {
-                                shapeList.map((item1) => {
-                                    let shape = drawLineFigure(item1).shape;
-                                    let position1 = drawLineFigure(item1).arr;
-                                    figurePosition = item1;
-                                    position = position1;
-                                    shape.arr = item1;
-                                    shape.type = 'shape';
-                                    shape.position = position1;
-                                    addSharpEvent(shape);
-                                    stage.addChild(shape);
-                                    stage.update();
-                                    return item1;
-                                });
-                            }
+                        } else {
+                            figurePosition = item.arr;
+                            position1 = item.position;
+                            position = item.position;
+                        }
+                        let {status, shapeList} = drawNewFigure(position1, obj);
+                        item.selected = status;
+                        statusArr.push(status);
+                        if (status) {
+                            shapeList.map((item1) => {
+                                let shape = drawLineFigure(item1).shape;
+                                let position1 = drawLineFigure(item1).arr;
+                                figurePosition = item1;
+                                position = position1;
+                                shape.arr = item1;
+                                shape.type = 'shape';
+                                shape.position = position1;
+                                addSharpEvent(shape);
+                                stage.addChild(shape);
+                                stage.update();
+                                return item1;
+                            });
+                        }
+                    }
+                    return item;
+                });
+
+                function removeChildren() {
+                    stage.children.map((item, index) => {
+                        if (item.selected) {
+                            stage.removeChild(stage.children[index]);
+                            removeChildren();
                         }
                         return item;
                     });
-
-                    function removeChildren() {
-                        stage.children.map((item, index) => {
-                            if (item.selected) {
-                                stage.removeChild(stage.children[index]);
-                                removeChildren();
-                            }
-                        });
-                    }
-
-                    removeChildren();
-                    if (statusArr.indexOf(true) !== -1) {
-                        --cutNumber;
-                    }
                 }
-                else {
-                    let {status, shapeList} = drawNewFigure(position, obj);
-                    if (status) {
-                        --cutNumber;
-                        stage.children.map((item, index) => {
-                            if (item.selected) {
-                                stage.removeChild(stage.children[index])
-                            }
-                        });
-                        position = [];
-                        figurePosition = [];
-                        shapeList.map((item) => {
-                            let shape = drawLineFigure(item).shape;
-                            let position = drawLineFigure(item).arr;
-                            shape.arr = item;
-                            shape.position = position;
-                            shape.type = 'shape';
-                            addSharpEvent(shape);
-                            stage.addChild(shape);
-                            stage.update();
-                            return item;
-                        });
-                    } else {
 
-                    }
+                removeChildren();
+                if (statusArr.indexOf(true) !== -1) {
+                    --cutNumber;
                 }
             }
         }

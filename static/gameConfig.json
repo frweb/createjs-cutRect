@@ -3,15 +3,23 @@
     "bgImage": "static/imgs/bg.jpg",
     "figurePositionList": [
       {
-        "cutNumber": 10,
+        "cutNumber": 20,
         "positionList": [
           {
             "x": 560,
             "y": 310
           },
           {
+            "x": 600,
+            "y": 390
+          },
+          {
             "x": 1360,
             "y": 310
+          },
+          {
+            "x": 1500,
+            "y": 390
           },
           {
             "x": 1360,
