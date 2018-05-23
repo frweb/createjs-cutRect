@@ -49,21 +49,35 @@
                 position = drawLineFigure(figurePosition).arr;
                 shape1 = drawLineFigure(figurePosition).shape;
                 shape1.selected = true;
-                shape1.type = 'shape';
+                shape1.types = 'shape';
                 shape1.position = position;
                 shape1.arr = figurePosition;
-                stage.addChild(bitmap);
+                // stage.addChild(bitmap);
                 stage.addChild(shape1);
                 stage.update();
             }
 
-            function drawLineFigure(arr) {
+            function drawLineFigure(arr,item) {
+                console.log(item);
                 let shape = new createjs.Shape();
                 let graphics = shape.graphics;
                 let newArr = [];
+                let bgImg = new createjs.Bitmap('static/imgs/rect.png');
+                if(item)
+                {
+                    // bgImg.x = item.x;
+                    // bgImg.y = item.y;
+                }
+                else{
+                    // bgImg.x = 0;
+                    // bgImg.y = 0;
+                }
+                bgImg.x = 560;
+                bgImg.y = 310;
+                let container = new createjs.Container();
                 graphics.beginStroke("#" + Math.floor(Math.random() * 16777215).toString(16));
                 graphics.setStrokeStyle(3);
-                graphics.beginFill("#" + Math.floor(Math.random() * 16777215).toString(16));
+                // graphics.beginFill("#" + Math.floor(Math.random() * 16777215).toString(16));
                 for (let i = 0; i < arr.length; i++) {
                     if (i === 0) {
                         graphics.moveTo(arr[0].x, arr[0].y);
@@ -95,7 +109,10 @@
                         })
                     }
                 }
-                return {arr: newArr, shape: shape};
+                bgImg.mask = shape;
+                container.addChild(shape);
+                container.addChild(bgImg);
+                return {arr: newArr, shape: container};
             }
 
             function segmentsIntr(a, b, c, d) {
@@ -182,44 +199,59 @@
             function addSharpEvent(shape) {
                 let oldX;
                 let oldY;
-                shape.addEventListener("mousedown", function (e) {
-                    e.target.status = 0;
-                    oldX = e.stageX;
-                    oldY = e.stageY;
-                });
-                shape.addEventListener("pressmove", function (e) {
-                    e.target.status = 2;
-                    e.target.x += e.stageX - oldX;
-                    e.target.y += e.stageY - oldY;
-                    oldX = e.stageX;
-                    oldY = e.stageY;
-                    stage.removeAllEventListeners('stagemousemove');
-                    stage.removeAllEventListeners('stagemouseup');
-                    stage.children.map((item, index) => {
-                        if (item.type === 'lines') {
-                            stage.removeChild(stage.children[index])
+                shape.addEventListener("mousedown", function (eDown) {
+                    eDown.target.status = 0;
+                    oldX = eDown.stageX;
+                    oldY = eDown.stageY;
+                    shape.addEventListener("mouseup",function(x){
+                    });
+                    stage.addEventListener("pressmove", function (eMove) {
+                        eDown.target.parent.status = 2;
+                        shape.x += eMove.stageX - oldX;
+                        shape.y += eMove.stageY - oldY;
+                        oldX = eMove.stageX;
+                        oldY = eMove.stageY;
+
+
+                        stage.removeAllEventListeners('stagemousemove');
+                        stage.removeAllEventListeners('stagemouseup');
+                        stage.children.map((item, index) => {
+                            if (item.types === 'lines') {
+                                stage.removeChild(stage.children[index])
+                            }
+                        });
+                    });
+                    stage.addEventListener("pressup", function (eUp) {
+                        shape.status = 1;
+                        if(shape.status!==2){
+                            shape.rotation += 10;
+                            // shape.status = 1;
                         }
+                        console.log(eUp);
+                        let arr1 = copyArray(eDown.target.parent.arr);
+                        let position1 = copyArray(eDown.target.parent.position);
+                        arr1.map((item) => {
+                            item.x += (shape.x);
+                            item.y += (shape.y);
+                            return item;
+                        });
+                        eDown.target.parent.x1 = eUp.nativeEvent.layerX;
+                        eDown.target.parent.y1 = eUp.nativeEvent.layerY;
+                        eDown.target.parent.x = shape.x;
+                        eDown.target.parent.y = shape.y;
+                        position1.map((item) => {
+                            item.start.x += (shape.x);
+                            item.start.y += (shape.y);
+                            item.end.x += (shape.x);
+                            item.end.y += (shape.y);
+                        });
+                        eDown.target.parent.arr1 = arr1;
+                        eDown.target.parent.position1 = position1;
+                        stage.removeAllEventListeners('pressmove');
+                        stage.removeAllEventListeners('pressup');
                     });
                 });
-                shape.addEventListener("pressup", function (e) {
-                    let x = e.target.x;
-                    let y = e.target.y;
-                    let arr1 = copyArray(e.target.arr);
-                    let position1 = copyArray(e.target.position);
-                    arr1.map((item) => {
-                        item.x += (x);
-                        item.y += (y);
-                        return item;
-                    });
-                    position1.map((item) => {
-                        item.start.x += (x);
-                        item.start.y += (y);
-                        item.end.x += (x);
-                        item.end.y += (y);
-                    });
-                    e.target.arr1 = arr1;
-                    e.target.position1 = position1;
-                });
+
             }
 
             stage.addEventListener('stagemousedown', drawLineDown);
@@ -240,9 +272,9 @@
                 toX = e.target.mouseX;
                 toY = e.target.mouseY;
                 line.graphics.setStrokeStyle(6).beginStroke("red").moveTo(moveX, moveY).lineTo(toX, toY).closePath();
-                line.type = 'lines';
+                line.types = 'lines';
                 stage.children.map((item, index) => {
-                    if (item.type === 'lines') {
+                    if (item.types === 'lines') {
                         stage.removeChild(stage.children[index])
                     }
                 });
@@ -257,7 +289,7 @@
                     return false;
                 }
                 stage.children.map((item, index) => {
-                    if (item.type === 'lines') {
+                    if (item.types === 'lines') {
                         stage.removeChild(stage.children[index])
                     }
                 });
@@ -276,7 +308,7 @@
                 let shapeChildren = stage.children;
                 let statusArr = [];
                 shapeChildren.map((item, index) => {
-                    if (item.type === 'shape' && item.type) {
+                    if (item.types === 'shape' && item.types) {
                         figurePosition = [];
                         position = [];
                         let position1 = [];
@@ -294,13 +326,14 @@
                         item.selected = status;
                         statusArr.push(status);
                         if (status) {
+                            console.log(item);
                             shapeList.map((item1) => {
-                                let shape = drawLineFigure(item1).shape;
-                                let position1 = drawLineFigure(item1).arr;
+                                let shape = drawLineFigure(item1,item).shape;
+                                let position1 = drawLineFigure(item1,item).arr;
                                 figurePosition = item1;
                                 position = position1;
                                 shape.arr = item1;
-                                shape.type = 'shape';
+                                shape.types = 'shape';
                                 shape.position = position1;
                                 addSharpEvent(shape);
                                 stage.addChild(shape);
@@ -321,7 +354,6 @@
                         return item;
                     });
                 }
-
                 removeChildren();
                 if (statusArr.indexOf(true) !== -1) {
                     --cutNumber;
